@@ -2,7 +2,10 @@ module github.com/Acarnesecchi/distributed-queue
 
 go 1.21.3
 
-require github.com/spf13/viper v1.18.2
+require (
+	github.com/google/uuid v1.6.0
+	github.com/spf13/viper v1.18.2
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect

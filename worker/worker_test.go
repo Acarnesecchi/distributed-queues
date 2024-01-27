@@ -7,5 +7,5 @@ import (
 )
 
 func TestConn(t *testing.T) {
-	worker.StartConnection(worker.NewConfig())
+	worker.StartConnection(worker.NewConfig().WithTasks("KillRat", "Bingchilling", "Bruh"))
 }

@@ -10,6 +10,7 @@ import (
 type Config struct {
 	TargetAddr string
 	ConnMode   string
+	Tasks      []string
 	Timeout    time.Duration
 }
 
@@ -46,5 +47,10 @@ func (c Config) WithConnMode(n string) Config {
 
 func (c Config) WithTargetAddr(s string) Config {
 	c.TargetAddr = s
+	return c
+}
+
+func (c Config) WithTasks(t ...string) Config {
+	c.Tasks = t
 	return c
 }

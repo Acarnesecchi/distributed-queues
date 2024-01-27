@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Worker struct {
 	Address     string
+	Tasks       []string
 	ConnectedAt time.Time
 }
 
@@ -36,10 +40,40 @@ func StartServer(s Server) {
 
 	fmt.Printf("Listening on %s\n", addr)
 
-	waitForConnections(s.config.Timeout, listener)
+	waitForConnections(&s, listener)
 
 }
 
-func handleClient(conn net.Conn) {
+func handleClient(s *Server, conn net.Conn) {
+	buf := make([]byte, 1024)
+	_, err := conn.Read(buf)
+	if err != nil {
+		return
+	}
+	msg := string(buf)
+	fmt.Print(msg)
+
+	firstWord := strings.Fields(msg)[0]
+	fmt.Println(firstWord)
+
+	switch firstWord {
+	case "tasks:":
+		id, _ := uuid.NewRandom()
+		taskList := strings.Split(strings.TrimPrefix(msg, "tasks:"), ",")
+		w := Worker{
+			Address:     conn.RemoteAddr().String(),
+			Tasks:       taskList,
+			ConnectedAt: time.Now(),
+		}
+		if s.WorkerList == nil {
+			s.WorkerList = make(map[string]Worker)
+		}
+		s.WorkerList[id.String()] = w
+		conn.Write(id[:])
+	case "id":
+		fmt.Print("aa")
+	default:
+		fmt.Println("nothing happened")
+	}
 	defer conn.Close()
 }
