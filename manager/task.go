@@ -1,11 +1,24 @@
 package manager
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Task struct {
-	ID       int
-	Type     string
-	Payload  map[string]string
-	Priority string
-	Metadata map[string]string
+	ID       int               `json:"-"`
+	Type     string            `json:"Type"`
+	Payload  map[string]string `json:"Payload"`
+	Priority string            `json:"Priority"`
+	Metadata map[string]string `json:"Metadata"`
+}
+
+func (t *Task) String() string {
+	payload := strings.TrimPrefix(fmt.Sprintf("%v", t.Payload), "map")
+	metadata := strings.TrimPrefix(fmt.Sprintf("%v", t.Metadata), "map")
+
+	return fmt.Sprintf("Task ID: %d\nType: %s\nPayload: %s\nPriority: %s\nMetadata: %s",
+		t.ID, t.Type, payload, t.Priority, metadata)
 }
 
 type TaskSlice struct {
