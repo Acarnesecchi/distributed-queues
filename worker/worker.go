@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
@@ -18,21 +19,47 @@ func StartConnection(c Config) {
 		fmt.Printf("Error connection to %s: %v", c.TargetAddr, err)
 		return
 	}
-	register(conn, c.Tasks)
+	id := register(conn, c.Tasks)
+	for {
+		ok := waitForTasks(conn, id)
+		if ok {
+			break
+		}
+		// log.Fatalf("we good")
+	}
 	defer conn.Close()
 }
 
-func register(c net.Conn, tasks []string) {
-	taskString := "tasks: " + strings.Join(tasks, ", ")
+func waitForTasks(c net.Conn, id string) bool {
+	taskBytes := make([]byte, 1024)
+	_, err := c.Read(taskBytes)
+	if err != nil {
+		return false
+	}
+	taskStr := string(bytes.Trim(taskBytes[:], "\x00"))
+
+	T, err := parseTaskFromString(string(taskStr))
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	var w *KillRatWorker
+	execute(w, *T)
+	return true
+}
+
+func register(c net.Conn, tasks []string) string {
+	taskString := "tasks: " + strings.Join(tasks, ",")
 	_, err := c.Write([]byte(taskString))
 	if err != nil {
 		fmt.Printf("could not register, retrying in %d seconds", 10)
 	}
-	id := make([]byte, 1024)
+	id := make([]byte, 36)
 	_, err = c.Read(id)
 	if err != nil {
 		fmt.Printf("could not assign ID, retrying in %d seconds. %v \n", 10, err)
 	}
+	return string(bytes.Trim(id[:], "\x00"))
 }
 
 var taskRegex = regexp.MustCompile("^[A-Z][a-zA-Z]*$")
