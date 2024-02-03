@@ -14,8 +14,7 @@ import (
 )
 
 var (
-	TotalTasks int    = 0
-	MemServer  Server //for testing only
+	TotalTasks int = 0
 )
 
 type Worker struct {
@@ -28,17 +27,20 @@ type Server struct {
 	config     Config
 	WorkerList map[string]Worker
 	StartTime  time.Time
+	TaskList   TaskSlice
 }
 
-func NewServer(c Config) Server {
-	MemServer.config = c
-	return MemServer
-	// return Server{
-	// 	config: c,
-	// }
+func NewServer(c Config) *Server {
+	err := validateConfig(c)
+	if err != nil {
+		log.Fatalf("invalid config: %v", err)
+	}
+	return &Server{
+		config: c,
+	}
 }
 
-func StartServer(s Server) {
+func StartServer(s *Server) {
 	addr := s.config.ListenAddr
 	network := s.config.ConnMode
 	s.StartTime = time.Now()
@@ -50,8 +52,8 @@ func StartServer(s Server) {
 
 	fmt.Printf("Listening on %s\n", addr)
 
-	go waitForConnections(&s, listener)
-	waitForJobs()
+	go waitForConnections(s, listener)
+	waitForJobs(s)
 }
 
 func handleClient(s *Server, conn net.Conn) {
@@ -79,18 +81,20 @@ func handleClient(s *Server, conn net.Conn) {
 		if s.WorkerList == nil {
 			s.WorkerList = make(map[string]Worker)
 		}
-		s.WorkerList[id.String()] = w
-		MemServer = *s
+		s.addWorker(w, id.String())
 		idBytes := []byte(id.String())
 		conn.Write(idBytes)
 	case "id":
 		fmt.Print("aa")
+	case "goodbye":
+		ID := strings.Fields(msg)[1]
+		s.removeWorker(ID)
 	default:
 		fmt.Println("nothing happened")
 	}
 }
 
-func waitForJobs() {
+func waitForJobs(s *Server) {
 	receiveJobs := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -98,7 +102,7 @@ func waitForJobs() {
 		}
 
 		var task Task
-		task.ID = assignID()
+		task.ID = assignID(s)
 		d := json.NewDecoder(r.Body)
 		err := d.Decode(&task)
 		if err != nil {
@@ -107,7 +111,7 @@ func waitForJobs() {
 		}
 
 		log.Printf("Received task: %+v\n", task)
-		distributeTask(task)
+		distributeTask(s, task)
 	}
 	http.HandleFunc("/new-job", receiveJobs)
 	if err := http.ListenAndServe(":25520", nil); err != nil {
@@ -115,20 +119,23 @@ func waitForJobs() {
 	}
 }
 
-func assignID() int {
+func assignID(s *Server) int {
 	// this should check on the etcd or a PV
-	// rather than being in one manager memory
-	TotalTasks++
-	return TotalTasks
+	// rather than being in one manager
+	return s.countTasks() + 1
 }
 
-func distributeTask(t Task) {
+func distributeTask(s *Server, t Task) {
 	availableWorkers := make([]Worker, 0)
 
-	for _, worker := range MemServer.WorkerList {
+	for _, worker := range s.WorkerList {
 		if contains(worker.Tasks, t.Type) {
 			availableWorkers = append(availableWorkers, worker)
 		}
+	}
+
+	if len(availableWorkers) == 0 {
+		return
 	}
 
 	conn := availableWorkers[0].Connection

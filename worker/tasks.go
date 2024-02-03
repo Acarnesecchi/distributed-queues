@@ -17,24 +17,24 @@ func execute(t Tasker, task Task) {
 	fmt.Printf("task: %+v", task)
 }
 
-type KillRatWorker struct {
-	Rats   string
-	Reward string
+type SlayEnemyWorker struct {
+	Enemies string
+	Reward  string
 }
 
-func (w *KillRatWorker) DoTask(t Task) error {
+func (w *SlayEnemyWorker) DoTask(t Task) error {
 	return nil
 }
 
-func (w *KillRatWorker) ConfirmReceived(t Task) (bool, error) {
+func (w *SlayEnemyWorker) ConfirmReceived(t Task) (bool, error) {
 	return true, nil
 }
 
-func (w *KillRatWorker) ConfirmCompleted(t Task) (bool, error) {
+func (w *SlayEnemyWorker) ConfirmCompleted(t Task) (bool, error) {
 	return true, nil
 }
 
-func (w *KillRatWorker) ConfirmError(t Task, err error) (bool, error) {
+func (w *SlayEnemyWorker) ConfirmError(t Task, err error) (bool, error) {
 	return true, nil
 }
 

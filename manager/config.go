@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 type Config struct {
 	ListenAddr string
 	ConnMode   string
+	Storage    string
 	MaxNodes   int
 	MinNodes   int
 	Timeout    time.Duration
@@ -19,6 +21,7 @@ func NewConfig() Config {
 	return Config{
 		ListenAddr: "localhost:25255",
 		ConnMode:   "tcp",
+		Storage:    "memory",
 		MaxNodes:   3,
 		MinNodes:   1,
 		Timeout:    1 * time.Minute,
@@ -38,8 +41,28 @@ func NewConfigFromFile(path string) Config {
 	return c
 }
 
+func validateConfig(c Config) error {
+	switch {
+	case c.MaxNodes < c.MinNodes:
+		return errors.New("max nodes must be greater than min nodes")
+	case c.Storage != "memory" && c.Storage != "kubernetes":
+		return errors.New("storage must be either memory or kubernetes")
+	case c.ConnMode != "tcp" && c.ConnMode != "unix":
+		return errors.New("conn mode must be either tcp or unix")
+	case c.Timeout < 0:
+		return errors.New("timeout must be greater than 0")
+	default:
+		return nil
+	}
+}
+
 func (c Config) WithListenAddr(s string) Config {
 	c.ListenAddr = s
+	return c
+}
+
+func (c Config) WithStorage(s string) Config {
+	c.Storage = s
 	return c
 }
 

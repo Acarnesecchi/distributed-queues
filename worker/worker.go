@@ -25,7 +25,6 @@ func StartConnection(c Config) {
 		if ok {
 			break
 		}
-		// log.Fatalf("we good")
 	}
 	defer conn.Close()
 }
@@ -43,7 +42,7 @@ func waitForTasks(c net.Conn, id string) bool {
 		fmt.Println(err.Error())
 		return false
 	}
-	var w *KillRatWorker
+	var w *SlayEnemyWorker
 	execute(w, *T)
 	return true
 }
