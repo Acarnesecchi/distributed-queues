@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/Acarnesecchi/distributed-queue/manager"
-	"github.com/Acarnesecchi/distributed-queue/worker"
+	"github.com/Acarnesecchi/distributed-queues/manager"
+	"github.com/Acarnesecchi/distributed-queues/worker"
 )
 
 func main() {

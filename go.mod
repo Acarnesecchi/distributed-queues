@@ -1,4 +1,4 @@
-module github.com/Acarnesecchi/distributed-queue
+module github.com/Acarnesecchi/distributed-queues
 
 go 1.21.3
 

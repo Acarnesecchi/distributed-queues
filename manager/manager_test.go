@@ -3,7 +3,7 @@ package manager_test
 import (
 	"testing"
 
-	"github.com/Acarnesecchi/distributed-queue/manager"
+	"github.com/Acarnesecchi/distributed-queues/manager"
 )
 
 func TestNewConfig(t *testing.T) {

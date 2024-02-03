@@ -3,7 +3,7 @@ package worker_test
 import (
 	"testing"
 
-	"github.com/Acarnesecchi/distributed-queue/worker"
+	"github.com/Acarnesecchi/distributed-queues/worker"
 )
 
 func TestConn(t *testing.T) {
