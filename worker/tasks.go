@@ -13,8 +13,9 @@ type Tasker interface {
 	DoTask(task Task) error
 }
 
-func execute(t Tasker, task Task) {
-	fmt.Printf("task: %+v", task)
+func execute(t Tasker, task Task) error {
+	err := t.DoTask(task)
+	return err
 }
 
 type SlayEnemyWorker struct {

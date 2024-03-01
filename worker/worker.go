@@ -43,7 +43,11 @@ func waitForTasks(c net.Conn, id string) bool {
 		return false
 	}
 	var w *SlayEnemyWorker
-	execute(w, *T)
+	err = execute(w, *T)
+	if err != nil {
+		w.ConfirmError(*T, err)
+		return false
+	}
 	return true
 }
 
