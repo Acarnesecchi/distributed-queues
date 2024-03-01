@@ -1,0 +1,6 @@
+targetAddr: localhost:15255
+connMode: tcp
+tasks:
+  - clicker
+  - killRat
+timeout: 30

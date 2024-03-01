@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Monitor</title>
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body>
+    <h1>Task Monitor</h1>
+    <div id="taskContainer">
+        <p>No tasks received yet.</p>
+    </div>
+    <script>
+        // Setup WebSocket connection
+        var ws = new WebSocket("ws://" + window.location.host + "/ws");
+        ws.onmessage = function(event) {
+            // Use HTMX to swap the content of 'taskContainer' with the received task details
+            htmx.find("#taskContainer").innerHTML = event.data;
+        };
+    </script>
+</body>
+</html>
