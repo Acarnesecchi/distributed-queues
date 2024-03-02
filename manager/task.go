@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -8,7 +9,7 @@ import (
 type Task struct {
 	ID       int               `json:"-"`
 	Type     string            `json:"Type"`
-	Payload  map[string]string `json:"Payload"`
+	Payload  json.RawMessage   `json:"Payload"`
 	Priority string            `json:"Priority"`
 	Metadata map[string]string `json:"Metadata"`
 }
